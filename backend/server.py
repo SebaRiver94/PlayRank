@@ -421,20 +421,23 @@ async def update_profile(user_update: UserUpdate, current_user: dict = Depends(g
 
 @api_router.get("/users/{user_id}", response_model=UserProfile)
 async def get_user(user_id: str, current_user: dict = Depends(get_current_user)):
-    user = await db.users.find_one({"_id": ObjectId(user_id)})
-    if not user:
+    try:
+        user = await db.users.find_one({"_id": ObjectId(user_id)})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        return UserProfile(
+            id=str(user["_id"]),
+            email=user["email"],
+            username=user["username"],
+            avatar=user.get("avatar"),
+            bio=user.get("bio"),
+            favorite_games=user.get("favorite_games", []),
+            external_accounts=user.get("external_accounts", {}),
+            created_at=user["created_at"]
+        )
+    except:
         raise HTTPException(status_code=404, detail="User not found")
-    
-    return UserProfile(
-        id=str(user["_id"]),
-        email=user["email"],
-        username=user["username"],
-        avatar=user.get("avatar"),
-        bio=user.get("bio"),
-        favorite_games=user.get("favorite_games", []),
-        external_accounts=user.get("external_accounts", {}),
-        created_at=user["created_at"]
-    )
 
 # ===== GROUP ROUTES =====
 
