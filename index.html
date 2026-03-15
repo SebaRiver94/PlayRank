@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlayRank - Bienvenida</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="app-container">
+        <main id="login-screen" class="screen">
+            <div class="brand">
+                <div class="logo-circle-container">
+                    <img src="icons/iconone.png" alt="PlayRank Beast" class="main-logo-img">
+                </div>
+                <h1 class="main-title">Play<span>Rank</span></h1>
+                <p class="tagline">Domina tus rankings, registra tus victorias.</p>
+            </div>
+
+            <section class="welcome-text">
+                <h2>¡Hola, Gamer!</h2>
+                <p>Para empezar a competir con tu crew, inicia sesión con tu plataforma favorita.</p>
+            </section>
+
+            <div class="auth-options">
+                <button class="auth-btn google" onclick="login('Google')">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2991/2991148.png" alt="Google">
+                    Continuar con Google
+                </button>
+
+                <button class="auth-btn discord" onclick="login('Discord')">
+                    <img src="https://cdn-icons-png.flaticon.com/512/3670/3670157.png" alt="Discord">
+                    Continuar con Discord
+                </button>
+            </div>
+
+            <p class="footer-note">Al ingresar, aceptas los términos de PlayRank.</p>
+        </main>
+
+        <main id="home-screen" class="screen" style="display: none;">
+            <header class="main-header">
+                <div class="logo-small">Play<span>Rank</span></div>
+                <div class="avatar"></div>
+            </header>
+
+            <div class="content">
+                <h1>Mis Grupos</h1>
+                <div class="groups-list" id="groups-container">
+                </div>
+            </div>
+
+            <nav class="bottom-nav">
+                <div class="nav-item active">Grupos</div>
+                <div class="nav-item">Global</div>
+                <div class="nav-item">Perfil</div>
+            </nav>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

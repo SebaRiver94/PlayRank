@@ -1,0 +1,158 @@
+/* style.css - PlayRank: Edición "Espaciado Premium" */
+
+:root {
+  --color-bg: #121212;
+  --color-surface: rgba(30, 30, 30, 0.85);
+  --color-primary: #007bff;
+  --color-primary-hover: #0056b3;
+  --color-text-main: #ffffff;
+  --color-text-muted: #aaaaaa;
+  --color-border: rgba(255, 255, 255, 0.1);
+  --border-radius: 16px;
+}
+
+/* --- RESET & ESTRUCTURA --- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: #000;
+  color: var(--color-text-main);
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.app-container {
+  width: 100%;
+  max-width: 430px;
+  min-height: 100vh;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 60px rgba(0, 0, 0, 0.9);
+  background-image: url("images/fondo-marble.png");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+}
+
+.screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding-bottom: 80px;
+}
+
+/* --- LOGIN SCREEN (ESPACIADO MEJORADO) --- */
+#login-screen {
+  background-color: rgba(0, 0, 0, 0.5);
+  justify-content: center;
+  align-items: center;
+  padding: 40px 30px; /* Más padding arriba y abajo */
+  text-align: center;
+}
+
+.brand {
+  margin-bottom: 60px; /* MÁS ESPACIO: Del título al saludo */
+  width: 100%;
+}
+
+.logo-circle-container {
+  width: 150px;
+  height: 150px;
+  background-color: var(--color-bg);
+  border-radius: 50%;
+  margin: 0 auto 25px; /* Más espacio bajo el logo */
+  overflow: hidden;
+  border: 3px solid var(--color-primary);
+  box-shadow: 0 0 25px rgba(0, 123, 255, 0.5);
+}
+
+.main-logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.main-title {
+  font-size: 2.8rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -2px;
+}
+
+.tagline {
+  color: var(--color-primary);
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-top: 10px;
+  letter-spacing: 1px;
+}
+
+/* SECCIÓN BIENVENIDA */
+.welcome-text {
+  margin-bottom: 50px; /* MÁS ESPACIO: Del saludo a los botones */
+}
+
+.welcome-text h2 {
+  font-size: 1.8rem;
+  margin-bottom: 12px; /* Separación del "Hola" con el texto de abajo */
+}
+
+.welcome-text p {
+  color: var(--color-text-muted);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+/* --- BOTONES DE LOGIN --- */
+.auth-options {
+  width: 100%;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* MÁS ESPACIO: Entre los dos botones */
+}
+
+.auth-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  padding: 16px;
+  border-radius: 12px;
+  border: none;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.auth-btn img {
+  width: 24px !important;
+  height: 24px !important;
+  object-fit: contain;
+}
+
+.google {
+  background: white;
+  color: black;
+}
+.discord {
+  background: #5865f2;
+  color: white;
+}
+
+.footer-note {
+  margin-top: 50px; /* Más espacio para la nota final */
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
