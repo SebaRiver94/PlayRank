@@ -23,8 +23,20 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
+# Configure logging first
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
 # JWT Configuration
-SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-change-this-in-production")
+SECRET_KEY = os.environ.get("SECRET_KEY")
+if not SECRET_KEY:
+    # Generate a random secret key for development
+    import secrets
+    SECRET_KEY = secrets.token_urlsafe(32)
+    logger.warning("SECRET_KEY not set - using generated key for development only!")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 43200  # 30 days
 
@@ -50,13 +62,6 @@ socket_app = socketio.ASGIApp(sio, app)
 
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
-
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
 
 # ===== PYDANTIC MODELS =====
 
@@ -476,7 +481,7 @@ async def create_group(group_data: GroupCreate, current_user: dict = Depends(get
 
 @api_router.get("/groups", response_model=List[Group])
 async def get_user_groups(current_user: dict = Depends(get_current_user)):
-    groups = await db.groups.find({"members": str(current_user["_id"])}).to_list(1000)
+    groups = await db.groups.find({"members": str(current_user["_id"])}).limit(100).to_list(100)
     return [Group(
         id=str(g["_id"]),
         name=g["name"],
@@ -568,20 +573,22 @@ async def get_group_members(group_id: str, current_user: dict = Depends(get_curr
     if str(current_user["_id"]) not in group["members"]:
         raise HTTPException(status_code=403, detail="Not a member of this group")
     
+    # Bulk query instead of N+1 pattern
+    member_ids = [ObjectId(mid) for mid in group["members"]]
+    users = await db.users.find({"_id": {"$in": member_ids}}).to_list(len(member_ids))
+    
     members = []
-    for member_id in group["members"]:
-        user = await db.users.find_one({"_id": ObjectId(member_id)})
-        if user:
-            members.append(UserProfile(
-                id=str(user["_id"]),
-                email=user["email"],
-                username=user["username"],
-                avatar=user.get("avatar"),
-                bio=user.get("bio"),
-                favorite_games=user.get("favorite_games", []),
-                external_accounts=user.get("external_accounts", {}),
-                created_at=user["created_at"]
-            ))
+    for user in users:
+        members.append(UserProfile(
+            id=str(user["_id"]),
+            email=user["email"],
+            username=user["username"],
+            avatar=user.get("avatar"),
+            bio=user.get("bio"),
+            favorite_games=user.get("favorite_games", []),
+            external_accounts=user.get("external_accounts", {}),
+            created_at=user["created_at"]
+        ))
     
     return members
 
@@ -622,7 +629,7 @@ async def get_game_types(group_id: str, current_user: dict = Depends(get_current
     if str(current_user["_id"]) not in group["members"]:
         raise HTTPException(status_code=403, detail="Not a member of this group")
     
-    game_types = await db.game_types.find({"group_id": group_id}).to_list(1000)
+    game_types = await db.game_types.find({"group_id": group_id}).limit(100).to_list(100)
     return [GameType(
         id=str(gt["_id"]),
         name=gt["name"],
@@ -703,7 +710,7 @@ async def get_group_matches(group_id: str, current_user: dict = Depends(get_curr
     if str(current_user["_id"]) not in group["members"]:
         raise HTTPException(status_code=403, detail="Not a member of this group")
     
-    matches = await db.matches.find({"group_id": group_id}).sort("date", -1).to_list(1000)
+    matches = await db.matches.find({"group_id": group_id}).sort("date", -1).limit(50).to_list(50)
     return [Match(
         id=str(m["_id"]),
         game_type_id=m["game_type_id"],
@@ -728,7 +735,7 @@ async def get_leaderboard(group_id: str, current_user: dict = Depends(get_curren
     if str(current_user["_id"]) not in group["members"]:
         raise HTTPException(status_code=403, detail="Not a member of this group")
     
-    stats = await db.stats.find({"group_id": group_id}).sort("wins", -1).to_list(1000)
+    stats = await db.stats.find({"group_id": group_id}).sort("wins", -1).limit(50).to_list(50)
     
     leaderboard = []
     for stat in stats:
