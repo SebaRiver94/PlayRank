@@ -672,12 +672,10 @@ async def create_match(match_data: MatchCreate, current_user: dict = Depends(get
     game_type = await db.game_types.find_one({"_id": ObjectId(match_data.game_type_id)})
     game_name = game_type["name"] if game_type else "Unknown Game"
     
-    # Create activity
-    winner_names = []
-    for winner_id in match_data.winner_ids:
-        user = await db.users.find_one({"_id": ObjectId(winner_id)})
-        if user:
-            winner_names.append(user["username"])
+    # Bulk query for winner names instead of N+1
+    winner_ids_obj = [ObjectId(wid) for wid in match_data.winner_ids]
+    winners = await db.users.find({"_id": {"$in": winner_ids_obj}}).to_list(len(winner_ids_obj))
+    winner_names = [user["username"] for user in winners]
     
     winners_str = ", ".join(winner_names)
     await create_activity(
@@ -737,9 +735,14 @@ async def get_leaderboard(group_id: str, current_user: dict = Depends(get_curren
     
     stats = await db.stats.find({"group_id": group_id}).sort("wins", -1).limit(50).to_list(50)
     
+    # Bulk query for users instead of N+1
+    user_ids = [ObjectId(stat["user_id"]) for stat in stats]
+    users = await db.users.find({"_id": {"$in": user_ids}}).to_list(len(user_ids))
+    user_dict = {str(user["_id"]): user for user in users}
+    
     leaderboard = []
     for stat in stats:
-        user = await db.users.find_one({"_id": ObjectId(stat["user_id"])})
+        user = user_dict.get(stat["user_id"])
         if user:
             leaderboard.append(LeaderboardEntry(
                 user_id=stat["user_id"],
