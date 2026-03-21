@@ -84,4 +84,4 @@ android-sdk/ -e
 venv/
 .env
 __pycache__/
-*.pyc
+*.pycls -
