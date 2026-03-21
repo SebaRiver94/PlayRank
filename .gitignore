@@ -81,3 +81,7 @@ android-sdk/ -e
 # Environment files
 *.env
 *.env.*
+venv/
+.env
+__pycache__/
+*.pyc
