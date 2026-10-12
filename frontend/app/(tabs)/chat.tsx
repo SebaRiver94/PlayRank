@@ -1,8 +1,11 @@
+import { useTheme } from '../../theme/ThemeProvider';
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function ChatScreen() {
+  const { theme } = useTheme();
+  const styles = React.useMemo(() => makeStyles(theme.colors), [theme]);
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
@@ -10,7 +13,7 @@ export default function ChatScreen() {
       </View>
 
       <View style={styles.emptyState}>
-        <Ionicons name="chatbubbles-outline" size={64} color="#666" />
+        <Ionicons name="chatbubbles-outline" size={64} color={theme.colors.textMuted} />
         <Text style={styles.emptyText}>No chats yet</Text>
         <Text style={styles.emptySubtext}>
           Join a group to start chatting with members!
@@ -20,10 +23,10 @@ export default function ChatScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: import('../../theme/themes').ThemeColors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0c0c0c',
+    backgroundColor: colors.background,
   },
   header: {
     padding: 24,
@@ -32,7 +35,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#fff',
+    color: colors.text,
   },
   emptyState: {
     alignItems: 'center',
@@ -43,12 +46,12 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#fff',
+    color: colors.text,
     marginTop: 16,
   },
   emptySubtext: {
     fontSize: 14,
-    color: '#666',
+    color: colors.textMuted,
     marginTop: 8,
     textAlign: 'center',
   },

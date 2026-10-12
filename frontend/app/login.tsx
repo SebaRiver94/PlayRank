@@ -1,3 +1,4 @@
+import { useTheme } from '../theme/ThemeProvider';
 import React, { useState } from 'react';
 import {
   View,
@@ -15,6 +16,8 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function LoginScreen() {
+  const { theme } = useTheme();
+  const styles = React.useMemo(() => makeStyles(theme.colors), [theme]);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -49,18 +52,18 @@ export default function LoginScreen() {
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
-          <Ionicons name="game-controller" size={64} color="#00D9FF" />
+          <Ionicons name="game-controller" size={64} color={theme.colors.primary} />
           <Text style={styles.title}>PlayRank</Text>
           <Text style={styles.subtitle}>Track, Compete, Dominate</Text>
         </View>
 
         <View style={styles.form}>
           <View style={styles.inputContainer}>
-            <Ionicons name="mail" size={20} color="#666" style={styles.inputIcon} />
+            <Ionicons name="mail" size={20} color={theme.colors.textMuted} style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               placeholder="Email"
-              placeholderTextColor="#666"
+              placeholderTextColor={theme.colors.textMuted}
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
@@ -69,11 +72,11 @@ export default function LoginScreen() {
           </View>
 
           <View style={styles.inputContainer}>
-            <Ionicons name="lock-closed" size={20} color="#666" style={styles.inputIcon} />
+            <Ionicons name="lock-closed" size={20} color={theme.colors.textMuted} style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               placeholder="Password"
-              placeholderTextColor="#666"
+              placeholderTextColor={theme.colors.textMuted}
               value={password}
               onChangeText={setPassword}
               secureTextEntry
@@ -98,7 +101,7 @@ export default function LoginScreen() {
             style={styles.socialButton}
             onPress={() => handleSocialLogin('Google')}
           >
-            <Ionicons name="logo-google" size={20} color="#fff" />
+            <Ionicons name="logo-google" size={20} color={theme.colors.text} />
             <Text style={styles.socialButtonText}>Continue with Google</Text>
           </TouchableOpacity>
 
@@ -106,7 +109,7 @@ export default function LoginScreen() {
             style={styles.socialButton}
             onPress={() => handleSocialLogin('Discord')}
           >
-            <Ionicons name="logo-discord" size={20} color="#fff" />
+            <Ionicons name="logo-discord" size={20} color={theme.colors.text} />
             <Text style={styles.socialButtonText}>Continue with Discord</Text>
           </TouchableOpacity>
 
@@ -124,10 +127,10 @@ export default function LoginScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: import('../theme/themes').ThemeColors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0c0c0c',
+    backgroundColor: colors.background,
   },
   scrollContent: {
     flexGrow: 1,
@@ -141,12 +144,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#fff',
+    color: colors.text,
     marginTop: 16,
   },
   subtitle: {
     fontSize: 16,
-    color: '#666',
+    color: colors.textMuted,
     marginTop: 8,
   },
   form: {
@@ -155,24 +158,24 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1a1a1a',
+    backgroundColor: colors.surface,
     borderRadius: 12,
     marginBottom: 16,
     paddingHorizontal: 16,
     borderWidth: 1,
-    borderColor: '#2a2a2a',
+    borderColor: colors.border,
   },
   inputIcon: {
     marginRight: 12,
   },
   input: {
     flex: 1,
-    color: '#fff',
+    color: colors.text,
     fontSize: 16,
     paddingVertical: 16,
   },
   button: {
-    backgroundColor: '#00D9FF',
+    backgroundColor: colors.primary,
     borderRadius: 12,
     padding: 16,
     alignItems: 'center',
@@ -182,7 +185,7 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   buttonText: {
-    color: '#000',
+    color: colors.onPrimary,
     fontSize: 16,
     fontWeight: 'bold',
   },
@@ -194,10 +197,10 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#2a2a2a',
+    backgroundColor: colors.border,
   },
   dividerText: {
-    color: '#666',
+    color: colors.textMuted,
     paddingHorizontal: 16,
     fontSize: 14,
   },
@@ -205,15 +208,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#1a1a1a',
+    backgroundColor: colors.surface,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#2a2a2a',
+    borderColor: colors.border,
   },
   socialButtonText: {
-    color: '#fff',
+    color: colors.text,
     fontSize: 16,
     marginLeft: 12,
     fontWeight: '600',
@@ -223,11 +226,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   linkText: {
-    color: '#666',
+    color: colors.textMuted,
     fontSize: 14,
   },
   linkTextBold: {
-    color: '#00D9FF',
+    color: colors.primary,
     fontWeight: 'bold',
   },
 });

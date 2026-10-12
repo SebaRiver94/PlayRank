@@ -1,3 +1,4 @@
+import { useTheme } from '../../theme/ThemeProvider';
 
 import React from 'react';
 import {
@@ -10,6 +11,8 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function GroupDetailScreen() {
+  const { theme } = useTheme();
+  const styles = React.useMemo(() => makeStyles(theme.colors), [theme]);
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
 
@@ -19,12 +22,12 @@ export default function GroupDetailScreen() {
         style={styles.backButton}
         onPress={() => router.back()}
       >
-        <Ionicons name="arrow-back" size={24} color="#00D9FF" />
+        <Ionicons name="arrow-back" size={24} color={theme.colors.primary} />
         <Text style={styles.backText}>Volver a grupos</Text>
       </TouchableOpacity>
 
       <View style={styles.content}>
-        <Ionicons name="people" size={64} color="#00D9FF" />
+        <Ionicons name="people" size={64} color={theme.colors.primary} />
 
         <Text style={styles.title}>Detalle del grupo</Text>
 
@@ -44,10 +47,10 @@ export default function GroupDetailScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: import('../../theme/themes').ThemeColors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0c0c0c',
+    backgroundColor: colors.background,
     padding: 24,
   },
   backButton: {
@@ -57,7 +60,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   backText: {
-    color: '#00D9FF',
+    color: colors.primary,
     fontSize: 16,
   },
   content: {
@@ -66,7 +69,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   title: {
-    color: '#fff',
+    color: colors.text,
     fontSize: 26,
     fontWeight: 'bold',
     marginTop: 20,
@@ -78,7 +81,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   groupId: {
-    color: '#00D9FF',
+    color: colors.primary,
     fontSize: 12,
     marginTop: 16,
   },

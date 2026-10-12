@@ -1,3 +1,4 @@
+import { useTheme } from '../../theme/ThemeProvider';
 import React, { useEffect, useState } from 'react';
 import {
   View,
@@ -25,6 +26,8 @@ interface Group {
 }
 
 export default function GroupsScreen() {
+  const { theme } = useTheme();
+  const styles = React.useMemo(() => makeStyles(theme.colors), [theme]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -101,13 +104,13 @@ export default function GroupsScreen() {
             style={styles.createButton}
             onPress={() => setModalVisible(true)}
           >
-            <Ionicons name="add" size={24} color="#000" />
+            <Ionicons name="add" size={24} color={theme.colors.onPrimary} />
           </TouchableOpacity>
         </View>
 
         {groups.length === 0 ? (
           <View style={styles.emptyState}>
-            <Ionicons name="people-outline" size={64} color="#666" />
+            <Ionicons name="people-outline" size={64} color={theme.colors.textMuted} />
             <Text style={styles.emptyText}>No groups yet</Text>
             <Text style={styles.emptySubtext}>Create a group to start competing!</Text>
             <TouchableOpacity
@@ -134,11 +137,11 @@ export default function GroupsScreen() {
                     {group.description || 'No description'}
                   </Text>
                   <View style={styles.groupMeta}>
-                    <Ionicons name="people" size={16} color="#666" />
+                    <Ionicons name="people" size={16} color={theme.colors.textMuted} />
                     <Text style={styles.groupMembers}>{group.members.length} members</Text>
                   </View>
                 </View>
-                <Ionicons name="chevron-forward" size={24} color="#666" />
+                <Ionicons name="chevron-forward" size={24} color={theme.colors.textMuted} />
               </TouchableOpacity>
             ))}
           </View>
@@ -156,14 +159,14 @@ export default function GroupsScreen() {
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Create Group</Text>
               <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <Ionicons name="close" size={24} color="#fff" />
+                <Ionicons name="close" size={24} color={theme.colors.text} />
               </TouchableOpacity>
             </View>
 
             <TextInput
               style={styles.input}
               placeholder="Group Name"
-              placeholderTextColor="#666"
+              placeholderTextColor={theme.colors.textMuted}
               value={groupName}
               onChangeText={setGroupName}
             />
@@ -171,7 +174,7 @@ export default function GroupsScreen() {
             <TextInput
               style={[styles.input, styles.textArea]}
               placeholder="Description (optional)"
-              placeholderTextColor="#666"
+              placeholderTextColor={theme.colors.textMuted}
               value={groupDescription}
               onChangeText={setGroupDescription}
               multiline
@@ -194,10 +197,10 @@ export default function GroupsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: import('../../theme/themes').ThemeColors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0c0c0c',
+    backgroundColor: colors.background,
   },
   scrollView: {
     flex: 1,
@@ -212,13 +215,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#fff',
+    color: colors.text,
   },
   createButton: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#00D9FF',
+    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -232,23 +235,23 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#fff',
+    color: colors.text,
     marginTop: 16,
   },
   emptySubtext: {
     fontSize: 14,
-    color: '#666',
+    color: colors.textMuted,
     marginTop: 8,
   },
   emptyButton: {
-    backgroundColor: '#00D9FF',
+    backgroundColor: colors.primary,
     borderRadius: 12,
     paddingVertical: 12,
     paddingHorizontal: 32,
     marginTop: 24,
   },
   emptyButtonText: {
-    color: '#000',
+    color: colors.onPrimary,
     fontSize: 16,
     fontWeight: 'bold',
   },
@@ -258,18 +261,18 @@ const styles = StyleSheet.create({
   groupCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1a1a1a',
+    backgroundColor: colors.surface,
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#2a2a2a',
+    borderColor: colors.border,
   },
   groupIcon: {
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#2a2a2a',
+    backgroundColor: colors.border,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 16,
@@ -283,12 +286,12 @@ const styles = StyleSheet.create({
   groupName: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#fff',
+    color: colors.text,
     marginBottom: 4,
   },
   groupDescription: {
     fontSize: 14,
-    color: '#666',
+    color: colors.textMuted,
     marginBottom: 8,
   },
   groupMeta: {
@@ -297,7 +300,7 @@ const styles = StyleSheet.create({
   },
   groupMembers: {
     fontSize: 12,
-    color: '#666',
+    color: colors.textMuted,
     marginLeft: 4,
   },
   modalOverlay: {
@@ -306,7 +309,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: colors.surface,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: 24,
@@ -321,24 +324,24 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#fff',
+    color: colors.text,
   },
   input: {
-    backgroundColor: '#0c0c0c',
+    backgroundColor: colors.background,
     borderRadius: 12,
     padding: 16,
-    color: '#fff',
+    color: colors.text,
     fontSize: 16,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#2a2a2a',
+    borderColor: colors.border,
   },
   textArea: {
     height: 100,
     textAlignVertical: 'top',
   },
   submitButton: {
-    backgroundColor: '#00D9FF',
+    backgroundColor: colors.primary,
     borderRadius: 12,
     padding: 16,
     alignItems: 'center',
@@ -348,12 +351,12 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   submitButtonText: {
-    color: '#000',
+    color: colors.onPrimary,
     fontSize: 16,
     fontWeight: 'bold',
   },
   loadingText: {
-    color: '#fff',
+    color: colors.text,
     fontSize: 16,
     textAlign: 'center',
     marginTop: 48,

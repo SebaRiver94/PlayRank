@@ -1,9 +1,12 @@
+import { useTheme } from '../../theme/ThemeProvider';
 import React from 'react';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet } from 'react-native';
 
 export default function TabLayout() {
+  const { theme } = useTheme();
+  const styles = React.useMemo(() => makeStyles(theme.colors), [theme]);
   return (
     <Tabs
       screenOptions={{
@@ -64,17 +67,17 @@ export default function TabLayout() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: import('../../theme/themes').ThemeColors) => StyleSheet.create({
   tabBar: {
-    backgroundColor: '#1a1a1a',
-    borderTopColor: '#2a2a2a',
+    backgroundColor: colors.surface,
+    borderTopColor: colors.border,
     height: 60,
     paddingBottom: 8,
     paddingTop: 8,
   },
   header: {
-    backgroundColor: '#1a1a1a',
-    borderBottomColor: '#2a2a2a',
+    backgroundColor: colors.surface,
+    borderBottomColor: colors.border,
   },
   headerTitle: {
     fontWeight: 'bold',

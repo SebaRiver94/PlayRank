@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import { ThemeId } from '../theme/themes';
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -13,6 +14,8 @@ interface User {
   favorite_games: string[];
   external_accounts: { [key: string]: string };
   created_at: string;
+  theme?: ThemeId;
+  theme_version?: number | null;
 }
 
 interface AuthContextType {
@@ -20,7 +23,8 @@ interface AuthContextType {
   token: string | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, username: string) => Promise<void>;
+  register: (email: string, password: string, username: string, theme?: ThemeId) => Promise<void>;
+  refreshUser: () => Promise<void>;
   logout: () => Promise<void>;
   updateUser: (userData: Partial<User>) => void;
 }
@@ -72,16 +76,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
     } catch (error: any) {
-      throw new Error(error.response?.data?.detail || 'Login failed');
+      throw new Error(typeof error.response?.data?.detail === 'string' ? error.response.data.detail : 'Login failed');
     }
   };
 
-  const register = async (email: string, password: string, username: string) => {
+  const register = async (email: string, password: string, username: string, theme: ThemeId = 'neo') => {
     try {
       const response = await axios.post(`${API_URL}/api/auth/register`, {
         email,
         password,
         username,
+        theme,
       });
 
       const { access_token, user: userData } = response.data;
@@ -94,7 +99,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
     } catch (error: any) {
-      throw new Error(error.response?.data?.detail || 'Registration failed');
+      throw new Error(typeof error.response?.data?.detail === 'string' ? error.response.data.detail : 'Registration failed: please check your details');
     }
   };
 
@@ -120,8 +125,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const refreshUser = React.useCallback(async () => {
+    if (!token) return;
+    const response = await axios.get(`${API_URL}/api/auth/me`, { headers: { Authorization: `Bearer ${token}` } });
+    setUser(response.data);
+    await AsyncStorage.setItem('user', JSON.stringify(response.data));
+  }, [token]);
+
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, logout, updateUser }}>
+    <AuthContext.Provider value={{ user, token, loading, login, register, logout, updateUser, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

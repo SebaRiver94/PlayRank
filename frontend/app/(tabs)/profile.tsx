@@ -1,3 +1,4 @@
+import { useTheme } from '../../theme/ThemeProvider';
 import React, { useState } from 'react';
 import {
   View,
@@ -14,11 +15,15 @@ import { useAuth } from '../../contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
+import { useRouter } from 'expo-router';
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 export default function ProfileScreen() {
+  const { theme } = useTheme();
+  const styles = React.useMemo(() => makeStyles(theme.colors), [theme]);
   const { user, logout, updateUser } = useAuth();
+  const router = useRouter();
   const [modalVisible, setModalVisible] = useState(false);
   const [externalModalVisible, setExternalModalVisible] = useState(false);
   const [username, setUsername] = useState(user?.username || '');
@@ -102,21 +107,22 @@ export default function ProfileScreen() {
       <View style={styles.header}>
         <Text style={styles.title}>Profile</Text>
         <TouchableOpacity onPress={handleLogout}>
-          <Ionicons name="log-out" size={24} color="#FF6B6B" />
+          <Ionicons name="log-out" size={24} color={theme.colors.danger} />
         </TouchableOpacity>
       </View>
 
+      <TouchableOpacity onPress={() => router.push('/settings')} style={{paddingHorizontal:24,paddingVertical:12,flexDirection:'row',alignItems:'center',gap:10}}><Ionicons name="settings-outline" size={20} color={theme.colors.primary} /><Text style={{color:'#fff',fontSize:16}}>Configuración y apariencia  →</Text></TouchableOpacity>
       <View style={styles.profileSection}>
         <TouchableOpacity style={styles.avatarContainer} onPress={pickImage}>
           {user?.avatar ? (
             <Image source={{ uri: user.avatar }} style={styles.avatar} />
           ) : (
             <View style={styles.avatarPlaceholder}>
-              <Ionicons name="person" size={48} color="#666" />
+              <Ionicons name="person" size={48} color={theme.colors.textMuted} />
             </View>
           )}
           <View style={styles.editBadge}>
-            <Ionicons name="camera" size={16} color="#fff" />
+            <Ionicons name="camera" size={16} color={theme.colors.text} />
           </View>
         </TouchableOpacity>
 
@@ -128,7 +134,7 @@ export default function ProfileScreen() {
           style={styles.editButton}
           onPress={() => setModalVisible(true)}
         >
-          <Ionicons name="create" size={20} color="#00D9FF" />
+          <Ionicons name="create" size={20} color={theme.colors.primary} />
           <Text style={styles.editButtonText}>Edit Profile</Text>
         </TouchableOpacity>
       </View>
@@ -136,7 +142,7 @@ export default function ProfileScreen() {
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Statistics</Text>
-          <Ionicons name="stats-chart" size={20} color="#00D9FF" />
+          <Ionicons name="stats-chart" size={20} color={theme.colors.primary} />
         </View>
         <View style={styles.statsRow}>
           <View style={styles.statItem}>
@@ -158,7 +164,7 @@ export default function ProfileScreen() {
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Connected Accounts</Text>
           <TouchableOpacity onPress={() => setExternalModalVisible(true)}>
-            <Ionicons name="add-circle" size={20} color="#00D9FF" />
+            <Ionicons name="add-circle" size={20} color={theme.colors.primary} />
           </TouchableOpacity>
         </View>
 
@@ -170,7 +176,7 @@ export default function ProfileScreen() {
         ].map((account) => (
           <View key={account.key} style={styles.accountItem}>
             <View style={styles.accountLeft}>
-              <Ionicons name={account.icon as any} size={24} color="#00D9FF" />
+              <Ionicons name={account.icon as any} size={24} color={theme.colors.primary} />
               <Text style={styles.accountLabel}>{account.label}</Text>
             </View>
             <Text style={styles.accountValue}>
@@ -191,14 +197,14 @@ export default function ProfileScreen() {
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Edit Profile</Text>
               <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <Ionicons name="close" size={24} color="#fff" />
+                <Ionicons name="close" size={24} color={theme.colors.text} />
               </TouchableOpacity>
             </View>
 
             <TextInput
               style={styles.input}
               placeholder="Username"
-              placeholderTextColor="#666"
+              placeholderTextColor={theme.colors.textMuted}
               value={username}
               onChangeText={setUsername}
             />
@@ -206,7 +212,7 @@ export default function ProfileScreen() {
             <TextInput
               style={[styles.input, styles.textArea]}
               placeholder="Bio"
-              placeholderTextColor="#666"
+              placeholderTextColor={theme.colors.textMuted}
               value={bio}
               onChangeText={setBio}
               multiline
@@ -237,49 +243,49 @@ export default function ProfileScreen() {
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Connected Accounts</Text>
               <TouchableOpacity onPress={() => setExternalModalVisible(false)}>
-                <Ionicons name="close" size={24} color="#fff" />
+                <Ionicons name="close" size={24} color={theme.colors.text} />
               </TouchableOpacity>
             </View>
 
             <View style={styles.inputContainer}>
-              <Ionicons name="logo-steam" size={20} color="#00D9FF" style={styles.inputIcon} />
+              <Ionicons name="logo-steam" size={20} color={theme.colors.primary} style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 placeholder="Steam Profile URL"
-                placeholderTextColor="#666"
+                placeholderTextColor={theme.colors.textMuted}
                 value={externalAccounts.steam}
                 onChangeText={(text) => setExternalAccounts({ ...externalAccounts, steam: text })}
               />
             </View>
 
             <View style={styles.inputContainer}>
-              <Ionicons name="logo-youtube" size={20} color="#00D9FF" style={styles.inputIcon} />
+              <Ionicons name="logo-youtube" size={20} color={theme.colors.primary} style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 placeholder="YouTube Channel URL"
-                placeholderTextColor="#666"
+                placeholderTextColor={theme.colors.textMuted}
                 value={externalAccounts.youtube}
                 onChangeText={(text) => setExternalAccounts({ ...externalAccounts, youtube: text })}
               />
             </View>
 
             <View style={styles.inputContainer}>
-              <Ionicons name="logo-twitch" size={20} color="#00D9FF" style={styles.inputIcon} />
+              <Ionicons name="logo-twitch" size={20} color={theme.colors.primary} style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 placeholder="Twitch Profile URL"
-                placeholderTextColor="#666"
+                placeholderTextColor={theme.colors.textMuted}
                 value={externalAccounts.twitch}
                 onChangeText={(text) => setExternalAccounts({ ...externalAccounts, twitch: text })}
               />
             </View>
 
             <View style={styles.inputContainer}>
-              <Ionicons name="play" size={20} color="#00D9FF" style={styles.inputIcon} />
+              <Ionicons name="play" size={20} color={theme.colors.primary} style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 placeholder="Kick Profile URL"
-                placeholderTextColor="#666"
+                placeholderTextColor={theme.colors.textMuted}
                 value={externalAccounts.kick}
                 onChangeText={(text) => setExternalAccounts({ ...externalAccounts, kick: text })}
               />
@@ -301,10 +307,10 @@ export default function ProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: import('../../theme/themes').ThemeColors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0c0c0c',
+    backgroundColor: colors.background,
   },
   header: {
     flexDirection: 'row',
@@ -316,13 +322,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#fff',
+    color: colors.text,
   },
   profileSection: {
     alignItems: 'center',
     padding: 24,
     borderBottomWidth: 1,
-    borderBottomColor: '#2a2a2a',
+    borderBottomColor: colors.border,
   },
   avatarContainer: {
     position: 'relative',
@@ -336,11 +342,11 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: '#2a2a2a',
+    borderColor: colors.border,
   },
   editBadge: {
     position: 'absolute',
@@ -349,42 +355,42 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#00D9FF',
+    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 3,
-    borderColor: '#0c0c0c',
+    borderColor: colors.background,
   },
   username: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#fff',
+    color: colors.text,
     marginTop: 16,
   },
   email: {
     fontSize: 14,
-    color: '#666',
+    color: colors.textMuted,
     marginTop: 4,
   },
   bio: {
     fontSize: 14,
-    color: '#fff',
+    color: colors.text,
     marginTop: 12,
     textAlign: 'center',
   },
   editButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1a1a1a',
+    backgroundColor: colors.surface,
     borderRadius: 12,
     paddingVertical: 12,
     paddingHorizontal: 24,
     marginTop: 16,
     borderWidth: 1,
-    borderColor: '#2a2a2a',
+    borderColor: colors.border,
   },
   editButtonText: {
-    color: '#00D9FF',
+    color: colors.primary,
     fontSize: 16,
     fontWeight: '600',
     marginLeft: 8,
@@ -392,7 +398,7 @@ const styles = StyleSheet.create({
   section: {
     padding: 24,
     borderBottomWidth: 1,
-    borderBottomColor: '#2a2a2a',
+    borderBottomColor: colors.border,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -403,7 +409,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#fff',
+    color: colors.text,
   },
   statsRow: {
     flexDirection: 'row',
@@ -415,23 +421,23 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#00D9FF',
+    color: colors.primary,
   },
   statLabel: {
     fontSize: 12,
-    color: '#666',
+    color: colors.textMuted,
     marginTop: 4,
   },
   accountItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#1a1a1a',
+    backgroundColor: colors.surface,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#2a2a2a',
+    borderColor: colors.border,
   },
   accountLeft: {
     flexDirection: 'row',
@@ -439,13 +445,13 @@ const styles = StyleSheet.create({
   },
   accountLabel: {
     fontSize: 16,
-    color: '#fff',
+    color: colors.text,
     marginLeft: 12,
     fontWeight: '600',
   },
   accountValue: {
     fontSize: 14,
-    color: '#666',
+    color: colors.textMuted,
   },
   modalOverlay: {
     flex: 1,
@@ -453,7 +459,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: colors.surface,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: 24,
@@ -468,38 +474,38 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#fff',
+    color: colors.text,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#0c0c0c',
+    backgroundColor: colors.background,
     borderRadius: 12,
     paddingHorizontal: 16,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#2a2a2a',
+    borderColor: colors.border,
   },
   inputIcon: {
     marginRight: 12,
   },
   input: {
     flex: 1,
-    backgroundColor: '#0c0c0c',
+    backgroundColor: colors.background,
     borderRadius: 12,
     padding: 16,
-    color: '#fff',
+    color: colors.text,
     fontSize: 16,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#2a2a2a',
+    borderColor: colors.border,
   },
   textArea: {
     height: 100,
     textAlignVertical: 'top',
   },
   submitButton: {
-    backgroundColor: '#00D9FF',
+    backgroundColor: colors.primary,
     borderRadius: 12,
     padding: 16,
     alignItems: 'center',
@@ -509,7 +515,7 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   submitButtonText: {
-    color: '#000',
+    color: colors.onPrimary,
     fontSize: 16,
     fontWeight: 'bold',
   },

@@ -1,3 +1,4 @@
+import { useTheme } from '../../theme/ThemeProvider';
 import React, { useEffect, useState } from 'react';
 import {
   View,
@@ -29,6 +30,8 @@ interface Activity {
 }
 
 export default function HomeScreen() {
+  const { theme } = useTheme();
+  const styles = React.useMemo(() => makeStyles(theme.colors), [theme]);
   const { user } = useAuth();
   const [groups, setGroups] = useState<Group[]>([]);
   const [recentActivities, setRecentActivities] = useState<Activity[]>([]);
@@ -89,22 +92,22 @@ export default function HomeScreen() {
           <Text style={styles.greeting}>Welcome back,</Text>
           <Text style={styles.username}>{user?.username}</Text>
         </View>
-        <Ionicons name="game-controller" size={32} color="#00D9FF" />
+        <Ionicons name="game-controller" size={32} color={theme.colors.primary} />
       </View>
 
       <View style={styles.statsGrid}>
         <View style={styles.statCard}>
-          <Ionicons name="people" size={24} color="#00D9FF" />
+          <Ionicons name="people" size={24} color={theme.colors.primary} />
           <Text style={styles.statValue}>{groups.length}</Text>
           <Text style={styles.statLabel}>Groups</Text>
         </View>
         <View style={styles.statCard}>
-          <Ionicons name="trophy" size={24} color="#FFD700" />
+          <Ionicons name="trophy" size={24} color={theme.colors.gold} />
           <Text style={styles.statValue}>0</Text>
           <Text style={styles.statLabel}>Wins</Text>
         </View>
         <View style={styles.statCard}>
-          <Ionicons name="flame" size={24} color="#FF6B6B" />
+          <Ionicons name="flame" size={24} color={theme.colors.danger} />
           <Text style={styles.statValue}>0</Text>
           <Text style={styles.statLabel}>Streak</Text>
         </View>
@@ -113,12 +116,12 @@ export default function HomeScreen() {
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Recent Activity</Text>
-          <Ionicons name="time" size={20} color="#00D9FF" />
+          <Ionicons name="time" size={20} color={theme.colors.primary} />
         </View>
 
         {recentActivities.length === 0 ? (
           <View style={styles.emptyState}>
-            <Ionicons name="newspaper-outline" size={48} color="#666" />
+            <Ionicons name="newspaper-outline" size={48} color={theme.colors.textMuted} />
             <Text style={styles.emptyText}>No recent activity</Text>
             <Text style={styles.emptySubtext}>Join a group and start competing!</Text>
           </View>
@@ -126,7 +129,7 @@ export default function HomeScreen() {
           recentActivities.map((activity) => (
             <View key={activity.id} style={styles.activityCard}>
               <View style={styles.activityIcon}>
-                <Ionicons name="notifications" size={20} color="#00D9FF" />
+                <Ionicons name="notifications" size={20} color={theme.colors.primary} />
               </View>
               <View style={styles.activityContent}>
                 <Text style={styles.activityText}>{activity.description}</Text>
@@ -142,7 +145,7 @@ export default function HomeScreen() {
       {groups.length === 0 && (
         <View style={styles.section}>
           <View style={styles.welcomeCard}>
-            <Ionicons name="rocket" size={48} color="#00D9FF" />
+            <Ionicons name="rocket" size={48} color={theme.colors.primary} />
             <Text style={styles.welcomeTitle}>Get Started!</Text>
             <Text style={styles.welcomeText}>
               Create or join a group to start tracking your competitions with friends
@@ -154,10 +157,10 @@ export default function HomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: import('../../theme/themes').ThemeColors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0c0c0c',
+    backgroundColor: colors.background,
   },
   header: {
     flexDirection: 'row',
@@ -168,12 +171,12 @@ const styles = StyleSheet.create({
   },
   greeting: {
     fontSize: 16,
-    color: '#666',
+    color: colors.textMuted,
   },
   username: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#fff',
+    color: colors.text,
     marginTop: 4,
   },
   statsGrid: {
@@ -183,22 +186,22 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: colors.surface,
     borderRadius: 16,
     padding: 16,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#2a2a2a',
+    borderColor: colors.border,
   },
   statValue: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#fff',
+    color: colors.text,
     marginTop: 8,
   },
   statLabel: {
     fontSize: 12,
-    color: '#666',
+    color: colors.textMuted,
     marginTop: 4,
   },
   section: {
@@ -213,16 +216,16 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#fff',
+    color: colors.text,
   },
   activityCard: {
     flexDirection: 'row',
-    backgroundColor: '#1a1a1a',
+    backgroundColor: colors.surface,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#2a2a2a',
+    borderColor: colors.border,
   },
   activityIcon: {
     width: 40,
@@ -238,12 +241,12 @@ const styles = StyleSheet.create({
   },
   activityText: {
     fontSize: 14,
-    color: '#fff',
+    color: colors.text,
     marginBottom: 4,
   },
   activityTime: {
     fontSize: 12,
-    color: '#666',
+    color: colors.textMuted,
   },
   emptyState: {
     alignItems: 'center',
@@ -251,36 +254,36 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 18,
-    color: '#fff',
+    color: colors.text,
     marginTop: 16,
   },
   emptySubtext: {
     fontSize: 14,
-    color: '#666',
+    color: colors.textMuted,
     marginTop: 8,
   },
   welcomeCard: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: colors.surface,
     borderRadius: 16,
     padding: 32,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#2a2a2a',
+    borderColor: colors.border,
   },
   welcomeTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#fff',
+    color: colors.text,
     marginTop: 16,
   },
   welcomeText: {
     fontSize: 16,
-    color: '#666',
+    color: colors.textMuted,
     marginTop: 12,
     textAlign: 'center',
   },
   loadingText: {
-    color: '#fff',
+    color: colors.text,
     fontSize: 16,
   },
 });
