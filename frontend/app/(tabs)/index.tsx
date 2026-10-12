@@ -35,6 +35,8 @@ export default function HomeScreen() {
   const { user } = useAuth();
   const [groups, setGroups] = useState<Group[]>([]);
   const [recentActivities, setRecentActivities] = useState<Activity[]>([]);
+  const [totalWins, setTotalWins] = useState(0);
+  const [bestStreak, setBestStreak] = useState(0);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -47,17 +49,28 @@ export default function HomeScreen() {
       const groupsRes = await axios.get(`${API_URL}/api/groups`);
       setGroups(groupsRes.data);
 
-      // Load recent activities from all groups
+      // Load recent activities + aggregate personal stats across the user's groups
       const activities: Activity[] = [];
-      for (const group of groupsRes.data.slice(0, 3)) {
+      let wins = 0;
+      let streak = 0;
+      for (const group of groupsRes.data) {
         try {
-          const actRes = await axios.get(`${API_URL}/api/groups/${group.id}/activities?limit=5`);
+          const [actRes, statsRes] = await Promise.all([
+            axios.get(`${API_URL}/api/groups/${group.id}/activities?limit=5`),
+            user?.id ? axios.get(`${API_URL}/api/groups/${group.id}/stats/${user.id}`) : Promise.resolve({ data: null }),
+          ]);
           activities.push(...actRes.data);
+          if (statsRes.data) {
+            wins += statsRes.data.wins || 0;
+            streak = Math.max(streak, statsRes.data.best_win_streak || 0);
+          }
         } catch (error) {
-          console.error('Error loading activities:', error);
+          console.error('Error loading group data:', error);
         }
       }
-      
+      setTotalWins(wins);
+      setBestStreak(streak);
+
       // Sort by date and take top 10
       activities.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
       setRecentActivities(activities.slice(0, 10));
@@ -85,7 +98,7 @@ export default function HomeScreen() {
   return (
     <ScrollView
       style={styles.container}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#00D9FF" />}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.colors.primary} />}
     >
       <View style={styles.header}>
         <View>
@@ -103,12 +116,12 @@ export default function HomeScreen() {
         </View>
         <View style={styles.statCard}>
           <Ionicons name="trophy" size={24} color={theme.colors.gold} />
-          <Text style={styles.statValue}>0</Text>
+          <Text style={styles.statValue}>{totalWins}</Text>
           <Text style={styles.statLabel}>Wins</Text>
         </View>
         <View style={styles.statCard}>
           <Ionicons name="flame" size={24} color={theme.colors.danger} />
-          <Text style={styles.statValue}>0</Text>
+          <Text style={styles.statValue}>{bestStreak}</Text>
           <Text style={styles.statLabel}>Streak</Text>
         </View>
       </View>
@@ -231,7 +244,7 @@ const makeStyles = (colors: import('../../theme/themes').ThemeColors) => StyleSh
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(0, 217, 255, 0.1)',
+    backgroundColor: colors.border,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,

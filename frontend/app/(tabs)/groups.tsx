@@ -35,6 +35,9 @@ export default function GroupsScreen() {
   const [groupName, setGroupName] = useState('');
   const [groupDescription, setGroupDescription] = useState('');
   const [creating, setCreating] = useState(false);
+  const [joinModalVisible, setJoinModalVisible] = useState(false);
+  const [joinCode, setJoinCode] = useState('');
+  const [joining, setJoining] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -84,6 +87,23 @@ export default function GroupsScreen() {
     }
   };
 
+  const handleJoinGroup = async () => {
+    const code = joinCode.trim();
+    if (!code) { Alert.alert('Error', 'Ingresá un código de invitación'); return; }
+    setJoining(true);
+    try {
+      await axios.post(`${API_URL}/api/groups/${code}/join`);
+      setJoinModalVisible(false);
+      setJoinCode('');
+      loadGroups();
+      Alert.alert('¡Listo!', 'Te uniste al grupo correctamente');
+    } catch (error: any) {
+      Alert.alert('Error', error.response?.data?.detail || 'No se pudo unir. Verificá el código.');
+    } finally {
+      setJoining(false);
+    }
+  };
+
   if (loading) {
     return (
       <View style={styles.container}>
@@ -96,16 +116,21 @@ export default function GroupsScreen() {
     <View style={styles.container}>
       <ScrollView
         style={styles.scrollView}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#00D9FF" />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.colors.primary} />}
       >
         <View style={styles.header}>
           <Text style={styles.title}>Your Groups</Text>
-          <TouchableOpacity
-            style={styles.createButton}
-            onPress={() => setModalVisible(true)}
-          >
-            <Ionicons name="add" size={24} color={theme.colors.onPrimary} />
-          </TouchableOpacity>
+          <View style={{ flexDirection: 'row', gap: 10 }}>
+            <TouchableOpacity style={styles.joinButton} onPress={() => setJoinModalVisible(true)}>
+              <Ionicons name="enter" size={22} color={theme.colors.primary} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.createButton}
+              onPress={() => setModalVisible(true)}
+            >
+              <Ionicons name="add" size={24} color={theme.colors.onPrimary} />
+            </TouchableOpacity>
+          </View>
         </View>
 
         {groups.length === 0 ? (
@@ -193,6 +218,43 @@ export default function GroupsScreen() {
           </View>
         </View>
       </Modal>
+      <Modal
+        visible={joinModalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setJoinModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Unirse a un grupo</Text>
+              <TouchableOpacity onPress={() => setJoinModalVisible(false)}>
+                <Ionicons name="close" size={24} color={theme.colors.text} />
+              </TouchableOpacity>
+            </View>
+            <Text style={{ color: theme.colors.textMuted, marginBottom: 16 }}>
+              Pegá el código de invitación que te compartieron.
+            </Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Código de invitación"
+              placeholderTextColor={theme.colors.textMuted}
+              value={joinCode}
+              onChangeText={setJoinCode}
+              autoCapitalize="none"
+            />
+            <TouchableOpacity
+              style={[styles.submitButton, joining && styles.submitButtonDisabled]}
+              onPress={handleJoinGroup}
+              disabled={joining}
+            >
+              <Text style={styles.submitButtonText}>
+                {joining ? 'Uniéndote...' : 'Unirse'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -222,6 +284,16 @@ const makeStyles = (colors: import('../../theme/themes').ThemeColors) => StyleSh
     height: 48,
     borderRadius: 24,
     backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  joinButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
     alignItems: 'center',
     justifyContent: 'center',
   },

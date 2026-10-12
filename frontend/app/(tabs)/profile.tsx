@@ -1,5 +1,5 @@
 import { useTheme } from '../../theme/ThemeProvider';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   View,
   Text,
@@ -15,7 +15,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -29,6 +29,26 @@ export default function ProfileScreen() {
   const [username, setUsername] = useState(user?.username || '');
   const [bio, setBio] = useState(user?.bio || '');
   const [saving, setSaving] = useState(false);
+  const [stats, setStats] = useState({ totalMatches: 0, wins: 0, winRate: 0 });
+
+  const loadStats = useCallback(async () => {
+    if (!user?.id) return;
+    try {
+      const groupsRes = await axios.get(`${API_URL}/api/groups`);
+      let totalMatches = 0;
+      let wins = 0;
+      for (const group of groupsRes.data) {
+        try {
+          const s = await axios.get(`${API_URL}/api/groups/${group.id}/stats/${user.id}`);
+          totalMatches += s.data.total_matches || 0;
+          wins += s.data.wins || 0;
+        } catch { /* ignore per-group errors */ }
+      }
+      setStats({ totalMatches, wins, winRate: totalMatches > 0 ? Math.round((wins / totalMatches) * 100) : 0 });
+    } catch { /* ignore */ }
+  }, [user?.id]);
+
+  useFocusEffect(useCallback(() => { loadStats(); }, [loadStats]));
 
   const [externalAccounts, setExternalAccounts] = useState({
     steam: user?.external_accounts?.steam || '',
@@ -111,7 +131,7 @@ export default function ProfileScreen() {
         </TouchableOpacity>
       </View>
 
-      <TouchableOpacity onPress={() => router.push('/settings')} style={{paddingHorizontal:24,paddingVertical:12,flexDirection:'row',alignItems:'center',gap:10}}><Ionicons name="settings-outline" size={20} color={theme.colors.primary} /><Text style={{color:'#fff',fontSize:16}}>Configuración y apariencia  →</Text></TouchableOpacity>
+      <TouchableOpacity onPress={() => router.push('/settings')} style={{paddingHorizontal:24,paddingVertical:12,flexDirection:'row',alignItems:'center',gap:10}}><Ionicons name="settings-outline" size={20} color={theme.colors.primary} /><Text style={{color:theme.colors.text,fontSize:16}}>Configuración y apariencia  →</Text></TouchableOpacity>
       <View style={styles.profileSection}>
         <TouchableOpacity style={styles.avatarContainer} onPress={pickImage}>
           {user?.avatar ? (
@@ -146,15 +166,15 @@ export default function ProfileScreen() {
         </View>
         <View style={styles.statsRow}>
           <View style={styles.statItem}>
-            <Text style={styles.statValue}>0</Text>
+            <Text style={styles.statValue}>{stats.totalMatches}</Text>
             <Text style={styles.statLabel}>Total Matches</Text>
           </View>
           <View style={styles.statItem}>
-            <Text style={styles.statValue}>0</Text>
+            <Text style={styles.statValue}>{stats.wins}</Text>
             <Text style={styles.statLabel}>Wins</Text>
           </View>
           <View style={styles.statItem}>
-            <Text style={styles.statValue}>0%</Text>
+            <Text style={styles.statValue}>{stats.winRate}%</Text>
             <Text style={styles.statLabel}>Win Rate</Text>
           </View>
         </View>
