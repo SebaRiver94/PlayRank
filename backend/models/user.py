@@ -1,11 +1,15 @@
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Dict, List, Literal, Optional
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator, model_validator
+
+from core.themes import normalize_theme, theme_version_of
 
 USERNAME_PATTERN = r"^[A-Za-z0-9_.-]+$"
 EXTERNAL_ACCOUNT_KEYS = {"steam", "youtube", "twitch", "kick", "playstation", "xbox", "epic", "discord"}
 MAX_AVATAR_CHARS = 3_000_000  # ~2 MB image encoded in base64
+# Must match core.themes.THEME_IDS (enforced by tests/test_themes_unit.py).
+ThemeId = Literal["neo", "sakura", "core"]
 
 
 class UserCreate(BaseModel):
@@ -13,6 +17,8 @@ class UserCreate(BaseModel):
     email: EmailStr
     password: str = Field(min_length=8, max_length=128)
     username: str = Field(min_length=3, max_length=30, pattern=USERNAME_PATTERN)
+    # Optional so existing clients keep working; defaults to "neo" on the server.
+    theme: Optional[ThemeId] = None
 
 
 class UserLogin(BaseModel):
@@ -30,6 +36,9 @@ class UserProfile(BaseModel):
     favorite_games: List[str] = []
     external_accounts: Dict[str, str] = {}
     created_at: datetime
+    # Private preferences: only returned to the account owner (null for other users).
+    theme: Optional[str] = None
+    theme_version: Optional[int] = None
 
 
 class UserUpdate(BaseModel):
@@ -39,6 +48,15 @@ class UserUpdate(BaseModel):
     bio: Optional[str] = Field(default=None, max_length=300)
     favorite_games: Optional[List[str]] = Field(default=None, max_length=50)
     external_accounts: Optional[Dict[str, str]] = None
+    theme: Optional[ThemeId] = None
+    # theme_version the client last saw; makes the theme write a compare-and-set (409 on mismatch).
+    theme_base_version: Optional[int] = Field(default=None, ge=0)
+
+    @model_validator(mode="after")
+    def base_version_requires_theme(self):
+        if self.theme_base_version is not None and self.theme is None:
+            raise ValueError("theme_base_version requires theme")
+        return self
 
     @field_validator("avatar")
     @classmethod
@@ -74,6 +92,8 @@ class Token(BaseModel):
 
 
 def to_profile(user: dict, include_email: bool = False) -> UserProfile:
+    """`include_email=True` means the caller is the account owner, so private fields
+    (email and theme preference) are included; for anyone else they are null."""
     return UserProfile(
         id=str(user["_id"]),
         email=user["email"] if include_email else None,
@@ -83,4 +103,6 @@ def to_profile(user: dict, include_email: bool = False) -> UserProfile:
         favorite_games=user.get("favorite_games", []),
         external_accounts=user.get("external_accounts", {}),
         created_at=user["created_at"],
+        theme=normalize_theme(user.get("theme")) if include_email else None,
+        theme_version=theme_version_of(user) if include_email else None,
     )

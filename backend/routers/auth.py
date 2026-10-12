@@ -5,6 +5,7 @@ from pymongo.errors import DuplicateKeyError
 
 from core.db import db
 from core.security import create_access_token, get_current_user, hash_password, verify_password
+from core.themes import DEFAULT_THEME
 from models.user import Token, UserCreate, UserLogin, UserProfile, to_profile
 from services.rate_limit import clear_login_failures, ensure_login_allowed, record_login_failure
 
@@ -32,6 +33,9 @@ async def register(user_data: UserCreate):
         "bio": None,
         "favorite_games": [],
         "external_accounts": {},
+        "theme": user_data.theme or DEFAULT_THEME,
+        "theme_version": 0,
+        "theme_updated_at": datetime.utcnow(),
         "created_at": datetime.utcnow(),
     }
     try:
